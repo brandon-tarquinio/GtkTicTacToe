@@ -8,7 +8,7 @@ class Player:
     def __init__(self, name, shape, turn, playerType):
         self.name = name
         self.wins = 0
-        self.loses = 0
+        self.losses = 0
         self.turn = turn
 
         self.playerType = playerType
@@ -21,14 +21,12 @@ class Game:
         # Wire Signals 
         signals = {
             "cell_clicked_cb" : self.cell_clicked_cb,
+            "RematchAccepted_clicked_cb" : self.rematchAccepted_clicked_cb,
+            "RematchRejected_clicked_cb" : self.rematchRejected_clicked_cb
         }
         builder.connect_signals( signals)
 
         # Init attributes
-        self.gameBoard = [ ["Blank", "Blank", "Blank"], 
-                       ["Blank", "Blank", "Blank"],
-                       ["Blank", "Blank", "Blank"] ]
-
         self.players = [player1, player2]
         self.curPlayer = self.players[0]
         self.builder = builder
@@ -36,26 +34,61 @@ class Game:
         self.gameInfoBox = builder.get_object("Game" + str(gameId) + "GameInfoGrid")
 
         #Setup game grid
+        self.setFreshBoard()
         self.updateGameInfo()
+
 
     def cell_clicked_cb(self, widget):
         if (self.getCurImage(widget) == "Blank"):
             self.setCurImage(widget)
 
             if (self.checkForWinner()):
-                self.playerWon()  
+                self.playerWon(widget)  
             else: 
                 self.updatePlayer()
                 self.updateGameInfo()
 
-    def playerWon(self):
+    def rematchAccepted_clicked_cb(self, widget):
+        self.setFreshBoard()
+
+        #rehide the box
+        self.builder.get_object("WinEventBox").set_opacity(0)
+
+    def rematchRejected_clicked_cb(self, widget):
+        print("blah 2")
+
+
+    def playerWon(self, widget):
         if (self.curPlayer == self.players[0]):
             self.players[0].wins += 1
             self.players[1].losses += 1
+            self.builder.get_object("WinnerMesg").set_text(self.players[1].name +
+                    " should be ashamed of that\n crushing defeat from " +
+                    self.players[0].name + ".\n Want to redeem yourself with a rematch?")
         else:
-            self.players[0].wins += 1
-            self.players[1].losses += 1
-        self.curPlayer.wins += 1 
+            self.players[1].wins += 1
+            self.players[0].losses += 1
+            self.builder.get_object("WinnerMesg").set_text(self.players[0].name +
+                    " should be ashamed of that\n crushing defeat from " +
+                    self.players[1].name + ".\n Want to redeem yourself with a rematch?")
+
+        self.updateGameInfo()
+        self.builder.get_object("WinnerMesg").set_line_wrap(True)
+        #self.builder.get_object("WinnerMesg").set_justify(Gtk.Justification.FILL)
+        
+        #Unhide the box
+        self.builder.get_object("WinEventBox").set_opacity(1.0)
+
+
+    def setFreshBoard(self):
+        self.gameBoard = [ ["Blank", "Blank", "Blank"], 
+                       ["Blank", "Blank", "Blank"],
+                       ["Blank", "Blank", "Blank"] ]
+        for i in range(0,3):
+            for j in range(0, 3):
+                self.builder.get_object(self.gameStr + "Button" + str(i) + str(j) +
+                        "Tile").set_from_file("Blank" + "Tile.png")
+
 
     # Returns true when a line contains all x or all o
     def checkLine(self, line):
@@ -76,6 +109,7 @@ class Game:
         #check diagonals
         return self.checkLine([self.gameBoard[i][i] for i in range(0,3)]) or self.checkLine( 
                 [ self.gameBoard[2][0], self.gameBoard[1][1], self.gameBoard[0][2] ])
+
 
     def getCurImage(self, widget):
         row = int(widget.get_name()[-2])
@@ -102,10 +136,15 @@ class Game:
             self.players[0].turn = True
             self.curPlayer = self.players[0]
 
+
     def updateGameInfo(self):
         for player in self.players:
             self.builder.get_object(self.gameStr + "Player" + player.shape + "Name").set_text(player.name)
             self.builder.get_object(self.gameStr + "Player" + player.shape + "Turn").set_text(str(player.turn))
+            self.builder.get_object(self.gameStr + "Player" + player.shape + "Wins").set_text(str(player.wins))
+            self.builder.get_object(self.gameStr + "Player" + player.shape +
+                    "Losses").set_text(str(player.losses))
+
 
 class TicTacToeGui:
     

@@ -201,6 +201,8 @@
                         <property name="name">GameBoard</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="margin_left">5</property>
+                        <property name="margin_top">5</property>
                         <child>
                           <object class="GtkButton" id="button00">
                             <property name="name">Game1Button00</property>
@@ -307,8 +309,8 @@
                             <property name="always_show_image">True</property>
                             <signal name="clicked" handler="cell_clicked_cb" swapped="no"/>
                             <child>
-                              <object class="GtkImage" id="BlankTile6">
-                                <property name="name">BlankImage</property>
+                              <object class="GtkImage" id="Game1Button22Tile">
+                                <property name="name">Game1Button22Tile</property>
                                 <property name="width_request">50</property>
                                 <property name="height_request">50</property>
                                 <property name="visible">True</property>
@@ -340,8 +342,8 @@
                             <property name="always_show_image">True</property>
                             <signal name="clicked" handler="cell_clicked_cb" swapped="no"/>
                             <child>
-                              <object class="GtkImage" id="BlankTile5">
-                                <property name="name">BlankImage</property>
+                              <object class="GtkImage" id="Game1Button12Tile">
+                                <property name="name">Game1Button12Tile</property>
                                 <property name="width_request">50</property>
                                 <property name="height_request">50</property>
                                 <property name="visible">True</property>
@@ -372,8 +374,8 @@
                             <property name="yalign">0</property>
                             <signal name="clicked" handler="cell_clicked_cb" swapped="no"/>
                             <child>
-                              <object class="GtkImage" id="BlankTile8">
-                                <property name="name">BlankImage</property>
+                              <object class="GtkImage" id="Game1Button21Tile">
+                                <property name="name">Game1Button21Tile</property>
                                 <property name="width_request">50</property>
                                 <property name="height_request">50</property>
                                 <property name="visible">True</property>
@@ -405,8 +407,8 @@
                             <property name="always_show_image">True</property>
                             <signal name="clicked" handler="cell_clicked_cb" swapped="no"/>
                             <child>
-                              <object class="GtkImage" id="BlankTile7">
-                                <property name="name">BlankImage</property>
+                              <object class="GtkImage" id="Game1Button20Tile">
+                                <property name="name">Game1Button21Tile</property>
                                 <property name="width_request">50</property>
                                 <property name="height_request">50</property>
                                 <property name="visible">True</property>
@@ -438,8 +440,8 @@
                             <property name="always_show_image">True</property>
                             <signal name="clicked" handler="cell_clicked_cb" swapped="no"/>
                             <child>
-                              <object class="GtkImage" id="BlankTile4">
-                                <property name="name">BlankImage</property>
+                              <object class="GtkImage" id="Game1Button11Tile">
+                                <property name="name">Game1Button11Tile</property>
                                 <property name="width_request">50</property>
                                 <property name="height_request">50</property>
                                 <property name="visible">True</property>
@@ -468,8 +470,8 @@
                             <property name="yalign">0</property>
                             <signal name="clicked" handler="cell_clicked_cb" swapped="no"/>
                             <child>
-                              <object class="GtkImage" id="BlankTile9">
-                                <property name="name">BlankImage</property>
+                              <object class="GtkImage" id="Game1Button10Tile">
+                                <property name="name">Game1Button10Tile</property>
                                 <property name="width_request">50</property>
                                 <property name="height_request">50</property>
                                 <property name="visible">True</property>
@@ -517,11 +519,27 @@
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkSeparator" id="separator2">
+                        <property name="width_request">15</property>
+                        <property name="height_request">400</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="orientation">vertical</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="padding">3</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkBox" id="SideBox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_left">6</property>
                         <property name="orientation">vertical</property>
+                        <property name="homogeneous">True</property>
                         <child>
                           <object class="GtkBox" id="GameInfoBox">
                             <property name="visible">True</property>
@@ -533,6 +551,11 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">Game Info</property>
+                                <attributes>
+                                  <attribute name="style" value="normal"/>
+                                  <attribute name="weight" value="semibold"/>
+                                  <attribute name="size" value="20200"/>
+                                </attributes>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -545,6 +568,11 @@
                                 <property name="name">GameInfoGrid</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="margin_right">4</property>
+                                <property name="hexpand">True</property>
+                                <property name="vexpand">False</property>
+                                <property name="row_spacing">4</property>
+                                <property name="row_homogeneous">True</property>
                                 <property name="column_homogeneous">True</property>
                                 <child>
                                   <object class="GtkLabel" id="Game1PlayerOName">
@@ -552,6 +580,7 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="label" translatable="yes">Player O</property>
+                                    <property name="ellipsize">start</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">0</property>
@@ -582,6 +611,11 @@
                                     <property name="ypad">3</property>
                                     <property name="label" translatable="yes">Player</property>
                                     <property name="ellipsize">end</property>
+                                    <attributes>
+                                      <attribute name="weight" value="semibold"/>
+                                      <attribute name="underline" value="True"/>
+                                      <attribute name="size" value="10000"/>
+                                    </attributes>
                                   </object>
                                   <packing>
                                     <property name="left_attach">0</property>
@@ -596,6 +630,11 @@
                                     <property name="can_focus">False</property>
                                     <property name="ypad">3</property>
                                     <property name="label" translatable="yes">Turn</property>
+                                    <attributes>
+                                      <attribute name="weight" value="semibold"/>
+                                      <attribute name="underline" value="True"/>
+                                      <attribute name="size" value="10000"/>
+                                    </attributes>
                                   </object>
                                   <packing>
                                     <property name="left_attach">1</property>
@@ -610,6 +649,11 @@
                                     <property name="can_focus">False</property>
                                     <property name="ypad">3</property>
                                     <property name="label" translatable="yes">Wins</property>
+                                    <attributes>
+                                      <attribute name="weight" value="semibold"/>
+                                      <attribute name="underline" value="True"/>
+                                      <attribute name="size" value="10000"/>
+                                    </attributes>
                                   </object>
                                   <packing>
                                     <property name="left_attach">2</property>
@@ -619,10 +663,15 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel" id="LosesKey">
+                                  <object class="GtkLabel" id="LossesKey">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">Loses</property>
+                                    <property name="label" translatable="yes">Losses</property>
+                                    <attributes>
+                                      <attribute name="weight" value="semibold"/>
+                                      <attribute name="underline" value="True"/>
+                                      <attribute name="size" value="10000"/>
+                                    </attributes>
                                   </object>
                                   <packing>
                                     <property name="left_attach">3</property>
@@ -679,6 +728,7 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="label" translatable="yes">0</property>
+                                    <property name="justify">center</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">2</property>
@@ -688,11 +738,12 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel" id="Game1PlayerOLoses">
-                                    <property name="name">Player2Loses</property>
+                                  <object class="GtkLabel" id="Game1PlayerOLosses">
+                                    <property name="name">Game1PlayerOLosses</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="label" translatable="yes">0</property>
+                                    <property name="justify">center</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">3</property>
@@ -702,12 +753,12 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel" id="Game1PlayerXLoses">
+                                  <object class="GtkLabel" id="Game1PlayerXLosses">
+                                    <property name="name">Game1PlayerXLosses</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="label" translatable="yes">0</property>
                                     <property name="justify">center</property>
-                                    <property name="ellipsize">end</property>
                                   </object>
                                   <packing>
                                     <property name="left_attach">3</property>
@@ -720,6 +771,7 @@
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
+                                <property name="padding">7</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
@@ -731,12 +783,92 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkToolbar" id="toolbar1">
+                          <object class="GtkEventBox" id="WinEventBox">
+                            <property name="name">WinEventBox</property>
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="opacity">0</property>
+                            <property name="hexpand">False</property>
+                            <property name="vexpand">False</property>
+                            <child>
+                              <object class="GtkBox" id="box3">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="orientation">vertical</property>
+                                <child>
+                                  <object class="GtkLabel" id="WinnerMesg">
+                                    <property name="name">WinnerMesg</property>
+                                    <property name="width_request">100</property>
+                                    <property name="height_request">107</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="margin_right">2</property>
+                                    <property name="justify">center</property>
+                                    <property name="wrap">True</property>
+                                    <property name="ellipsize">end</property>
+                                    <property name="width_chars">20</property>
+                                    <property name="max_width_chars">20</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">True</property>
+                                    <property name="fill">True</property>
+                                    <property name="padding">5</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkButtonBox" id="buttonbox1">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="spacing">10</property>
+                                    <property name="homogeneous">True</property>
+                                    <property name="layout_style">start</property>
+                                    <child>
+                                      <object class="GtkButton" id="RematchReject">
+                                        <property name="label">gtk-no</property>
+                                        <property name="name">RematchReject</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="use_stock">True</property>
+                                        <property name="always_show_image">True</property>
+                                        <signal name="clicked" handler="RematchRejected_clicked_cb" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">True</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkButton" id="RematchAccepted">
+                                        <property name="label">gtk-yes</property>
+                                        <property name="name">RematchAccepted</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="use_stock">True</property>
+                                        <property name="always_show_image">True</property>
+                                        <signal name="clicked" handler="RematchAccepted_clicked_cb" swapped="no"/>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">True</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">True</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                            </child>
                           </object>
                           <packing>
-                            <property name="expand">True</property>
+                            <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">1</property>
                           </packing>
@@ -745,7 +877,7 @@
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">1</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                   </object>
@@ -792,6 +924,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">ChatBox:</property>
+                        <property name="ellipsize">middle</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
