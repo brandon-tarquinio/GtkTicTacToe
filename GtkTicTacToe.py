@@ -1,6 +1,6 @@
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, GdkPixbuf
 
 
 class Player:
@@ -22,7 +22,8 @@ class Game:
         signals = {
             "cell_clicked_cb" : self.cell_clicked_cb,
             "RematchAccepted_clicked_cb" : self.rematchAccepted_clicked_cb,
-            "RematchRejected_clicked_cb" : self.rematchRejected_clicked_cb
+            "RematchRejected_clicked_cb" : self.rematchRejected_clicked_cb,
+            "create-window_cb"             : self.create_window_cb
         }
         builder.connect_signals( signals)
 
@@ -37,6 +38,8 @@ class Game:
         self.setFreshBoard()
         self.updateGameInfo()
 
+    def create_window_cb(self, widget):
+        print("asdfasdf")
 
     def cell_clicked_cb(self, widget):
         if (self.getCurImage(widget) == "Blank"):
@@ -122,7 +125,7 @@ class Game:
         row = int(widget.get_name()[-2])
         col = int(widget.get_name()[-1])
 
-        widget.get_child().set_from_file(shape + "Tile.png")        
+        widget.get_child().set_from_pixbuf(tileDic[shape])
         self.gameBoard[row][col] = self.curPlayer.shape 
 
 
@@ -146,23 +149,111 @@ class Game:
                     "Losses").set_text(str(player.losses))
 
 
-class TicTacToeGui:
+tileDic = {
+        "X" : GdkPixbuf.Pixbuf.new_from_file_at_scale("XTile.png", width=200,
+            height=200,preserve_aspect_ratio=True ),
+        "O" : GdkPixbuf.Pixbuf.new_from_file_at_scale("OTile.png", width=200,
+            height=200,preserve_aspect_ratio=True ),
+        "Blank" : GdkPixbuf.Pixbuf.new_from_file_at_scale("BlankTile.png", width=200,
+            height=200,preserve_aspect_ratio=True ),
+}
+
+
+class GameBoardGui:
     
-  def __init__( self ):
-    self.builder = Gtk.Builder()
-    self.builder.add_from_file("TicTacToeGui.glade")
+    def __init__( self ):
+        self.mainBox = Gtk.Box(orientation = Gtk.Orientation.HORIZONTAL, spacing = 0)
+        self.mainBox.set_homogeneous(False)
 
-    self.window = self.builder.get_object("MainWindow")
-    self.window.connect("delete-event", Gtk.main_quit)
+class TicTacToeBoard(GameBoardGui):
 
-    player1 = Player("Brandon", "X", True, "local")
-    player2 = Player("Other Brandon", "O", False, "local")
-    gameId = 1
-    self.Game1 = Game(self.builder, gameId, player1, player2)
+    def __init__(self):
+        GameBoardGui.__init__( self )
+
+        self.GameBoard = Gtk.Grid(orientation = Gtk.Orientation.HORIZONTAL)
+        self.mainBox.pack_start(self.GameBoard, False, False, 0)
+
+        for i in range(0, 3):
+            for j in range(0,3):
+                button = Gtk.Button()
+                button.set_relief(Gtk.ReliefStyle.NONE)
+                image = Gtk.Image()
+                image.set_from_pixbuf(tileDic["Blank"])
+                button.add(image)
+                self.GameBoard.attach(button,i, j, 1, 1) 
 
 
-ticTacToeGui = TicTacToeGui()
-curWindow = ticTacToeGui.window
+class GameInfoGui:
+    
+    def __init__( self):
+        self.mainBox = Gtk.Box(orientation = Gtk.Orientation.VERTICAL, spacing = 10)
+        self.mainBox.set_homogeneous(True)
+
+        self.gameStatsBox = Gtk.Box(orientation = Gtk.Orientation.VERTICAL, spacing = 3)
+        self.gameStatsBox.set_homogeneous(False)
+        self.gameStatsBox.pack_start(Gtk.Label( "This is the game stats box" ), True,
+                False, 0)
+        
+        self.messageArea = Gtk.Box(orientation = Gtk.Orientation.VERTICAL, spacing = 3)
+        self.messageArea.set_homogeneous(False)
+        self.messageArea.pack_start(Gtk.Label( "This is the secret message area" ),
+                True, False, 0)
+
+        self.mainBox.pack_start(self.gameStatsBox, True, False, 0)
+        self.mainBox.pack_start(self.messageArea, True, False, 0)
+
+
+class ChatGui:
+
+    def __init__( self ):
+        self.mainBox = Gtk.Box(orientation = Gtk.Orientation.VERTICAL, spacing = 10)
+        self.mainBox.set_homogeneous(False)
+        self.mainBox.pack_start(Gtk.Label( "Chat box here"), True, False, 0)
+
+class GameGui:
+
+    def __init__( self, gameId, gameLogic, gameGui, gameInfoGui, chatGui):
+        self.gameId = gameId
+        self.gameLogic = gameLogic
+        self.gameGui = gameGui
+        self.gameInfoGui = gameInfoGui
+        self.chatGui = chatGui
+
+        # Make middle game area
+        hbox = Gtk.Box(orientation = Gtk.Orientation.HORIZONTAL, spacing = 0)
+        hbox.set_homogeneous(False)
+        hbox.pack_start(self.gameGui.mainBox, True, False, 0)
+        hbox.pack_start(Gtk.Separator(orientation = Gtk.Orientation.VERTICAL), True, False, 0)
+        hbox.pack_start(self.gameInfoGui.mainBox, True, False, 0)
+
+        self.mainBox = Gtk.Box(orientation = Gtk.Orientation.VERTICAL, spacing = 10)
+        self.mainBox.set_homogeneous(False)
+        self.mainBox.pack_start(hbox, False, False, 0)
+        self.mainBox.pack_start(Gtk.Separator(orientation = Gtk.Orientation.HORIZONTAL), False, False, 0)
+        self.mainBox.pack_start(self.chatGui.mainBox, False, False, 0)
+
+class ApplicationGui:
+    
+    def __init__( self ):
+        self.builder = Gtk.Builder()
+        self.builder.add_from_file("TicTacToeGui.glade")
+
+        self.window = self.builder.get_object("MainWindow")
+        self.window.connect("delete-event", Gtk.main_quit)
+
+        self.notebook = self.builder.get_object("GameNotebook")
+
+        self.notebook.append_page(GameGui( "game2", "GameLogic", TicTacToeBoard(),
+            GameInfoGui(), ChatGui()).mainBox, Gtk.Label("Game2")) 
+
+        player1 = Player("Brandon", "X", True, "local")
+        player2 = Player("Other Brandon", "O", False, "local")
+        gameId = 1
+        self.Game1 = Game(self.builder, gameId, player1, player2)
+
+
+applicationGui = ApplicationGui()
+curWindow = applicationGui.window
 curWindow.show_all()
 
 Gtk.main()
