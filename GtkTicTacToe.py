@@ -243,14 +243,25 @@ class ApplicationGui:
 
         self.notebook = self.builder.get_object("GameNotebook")
 
-        self.notebook.append_page(GameGui( "game2", "GameLogic", TicTacToeBoard(),
-            GameInfoGui(), ChatGui()).mainBox, Gtk.Label("Game2")) 
+        # add next tab button
+        addButton = Gtk.Button(label = "Add Game!")
+        addButton.connect("clicked", self.add_tab_cb)
+        self.notebook.append_page(Gtk.Box(), addButton)
+        self.notebookLastPage = 1 
+
 
         player1 = Player("Brandon", "X", True, "local")
         player2 = Player("Other Brandon", "O", False, "local")
         gameId = 1
         self.Game1 = Game(self.builder, gameId, player1, player2)
 
+    def add_tab_cb(self, widget):
+        gameNum = str(self.notebookLastPage + 1)
+        self.notebook.insert_page(GameGui( "game" + gameNum, "GameLogic", TicTacToeBoard(),
+            GameInfoGui(), ChatGui()).mainBox, Gtk.Label("Game" + gameNum),
+            self.notebookLastPage)
+        self.notebook.show_all()
+        self.notebookLastPage += 1
 
 applicationGui = ApplicationGui()
 curWindow = applicationGui.window
