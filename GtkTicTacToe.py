@@ -41,48 +41,6 @@ class Game:
     def create_window_cb(self, widget):
         print("asdfasdf")
 
-    def cell_clicked_cb(self, widget):
-        if (self.getCurImage(widget) == "Blank"):
-            self.setCurImage(widget)
-
-            if (self.checkForWinner()):
-                self.playerWon(widget)  
-            else: 
-                self.updatePlayer()
-                self.updateGameInfo()
-
-    def rematchAccepted_clicked_cb(self, widget):
-        self.setFreshBoard()
-
-        #rehide the box
-        self.builder.get_object("WinEventBox").set_opacity(0)
-
-    def rematchRejected_clicked_cb(self, widget):
-        print("blah 2")
-
-
-    def playerWon(self, widget):
-        if (self.curPlayer == self.players[0]):
-            self.players[0].wins += 1
-            self.players[1].losses += 1
-            self.builder.get_object("WinnerMesg").set_text(self.players[1].name +
-                    " should be ashamed of that\n crushing defeat from " +
-                    self.players[0].name + ".\n Want to redeem yourself with a rematch?")
-        else:
-            self.players[1].wins += 1
-            self.players[0].losses += 1
-            self.builder.get_object("WinnerMesg").set_text(self.players[0].name +
-                    " should be ashamed of that\n crushing defeat from " +
-                    self.players[1].name + ".\n Want to redeem yourself with a rematch?")
-
-        self.updateGameInfo()
-        self.builder.get_object("WinnerMesg").set_line_wrap(True)
-        #self.builder.get_object("WinnerMesg").set_justify(Gtk.Justification.FILL)
-        
-        #Unhide the box
-        self.builder.get_object("WinEventBox").set_opacity(1.0)
-
-
     def setFreshBoard(self):
         self.gameBoard = [ ["Blank", "Blank", "Blank"], 
                        ["Blank", "Blank", "Blank"],
@@ -91,62 +49,6 @@ class Game:
             for j in range(0, 3):
                 self.builder.get_object(self.gameStr + "Button" + str(i) + str(j) +
                         "Tile").set_from_file("Blank" + "Tile.png")
-
-
-    # Returns true when a line contains all x or all o
-    def checkLine(self, line):
-        return (line[0] != "Blank") and (line[0] == line[1]) and (line[1] == line[2])
-
-    # Returns true if a line is all the same 
-    def checkForWinner(self):
-        #check cols 
-        for colNum in range(0,3):
-            if ( self.checkLine([row[colNum] for row in self.gameBoard]) ):
-                return True
-
-        #check cols
-        for row in self.gameBoard:
-            if ( self.checkLine(row) ):
-                return True
-
-        #check diagonals
-        return self.checkLine([self.gameBoard[i][i] for i in range(0,3)]) or self.checkLine( 
-                [ self.gameBoard[2][0], self.gameBoard[1][1], self.gameBoard[0][2] ])
-
-
-    def getCurImage(self, widget):
-        row = int(widget.get_name()[-2])
-        col = int(widget.get_name()[-1])
-        return self.gameBoard[row][col]
-
-
-    def setCurImage(self, widget):
-        shape = self.curPlayer.shape
-        row = int(widget.get_name()[-2])
-        col = int(widget.get_name()[-1])
-
-        widget.get_child().set_from_pixbuf(tileDic[shape])
-        self.gameBoard[row][col] = self.curPlayer.shape 
-
-
-    def updatePlayer(self):
-        if (self.curPlayer == self.players[0]):
-            self.players[0].turn = False
-            self.players[1].turn = True
-            self.curPlayer = self.players[1]
-        else:
-            self.players[1].turn = False
-            self.players[0].turn = True
-            self.curPlayer = self.players[0]
-
-
-    def updateGameInfo(self):
-        for player in self.players:
-            self.builder.get_object(self.gameStr + "Player" + player.shape + "Name").set_text(player.name)
-            self.builder.get_object(self.gameStr + "Player" + player.shape + "Turn").set_text(str(player.turn))
-            self.builder.get_object(self.gameStr + "Player" + player.shape + "Wins").set_text(str(player.wins))
-            self.builder.get_object(self.gameStr + "Player" + player.shape +
-                    "Losses").set_text(str(player.losses))
 
 
 tileDic = {
@@ -163,7 +65,7 @@ class TicTacToeGame:
 
     def __init__(self, gameBoardGui, gameInfoGui, player1, player2 ):
         self.gameBoardGui = gameBoardGui
-        self.gameInfoGui = GameInfoGui
+        self.gameInfoGui = gameInfoGui
         self.players = [player1, player2]
         self.curPlayerNum = 0
 
@@ -178,7 +80,7 @@ class TicTacToeGame:
                 self.playerWon(widget)  
             else: 
                 self.updatePlayer()
-#                self.updateGameInfo()
+                self.gameInfoGui.updateGameInfo(self.players)
 
     def rematchAccepted_clicked_cb(self, widget):
         self.setFreshBoard()
@@ -201,7 +103,8 @@ class TicTacToeGame:
         print(winnerMesg)
         #self.builder.get_object("WinnerMesg").set_text
 
-        #self.updateGameInfo()
+
+        self.gameInfoGui.updateGameInfo(self.players)
 
         #self.builder.get_object("WinnerMesg").set_line_wrap(True)
         #self.builder.get_object("WinnerMesg").set_justify(Gtk.Justification.FILL)
@@ -253,13 +156,13 @@ class TicTacToeGame:
                        ["Blank", "Blank", "Blank"] ]
 
         
-
 class GameBoardGui:
     
     def __init__( self ):
         self.mainBox = Gtk.Box(orientation = Gtk.Orientation.HORIZONTAL, spacing = 0)
         self.mainBox.set_homogeneous(False)
 
+    
 class TicTacToeBoard(GameBoardGui):
 
     def __init__(self):
@@ -288,16 +191,8 @@ class TicTacToeBoard(GameBoardGui):
             for button in rowOfButton:
                 button.connect("clicked", callback_func)
 
-    #def getCurImage(self, widget):
-        #print(widget.get_name())
-        #row = int(widget.get_name()[-2])
-        #col = int(widget.get_name()[-1])
-    #    return self.board[row][col]
-
     def setImageShape(self, widget, shape):
         widget.get_child().set_from_pixbuf(tileDic[shape])
-
-
 
 class GameInfoGui:
     
@@ -307,7 +202,8 @@ class GameInfoGui:
 
         self.gameStatsBox = Gtk.Box(orientation = Gtk.Orientation.VERTICAL, spacing = 3)
         self.gameStatsBox.set_homogeneous(False)
-        self.gameStatsBox.pack_start(Gtk.Label( "This is the game stats box" ), True,
+        self.gameStatsBoxLabel = Gtk.Label( "Game Info" )
+        self.gameStatsBox.pack_start(self.gameStatsBoxLabel, True,
                 False, 0)
         
         self.messageArea = Gtk.Box(orientation = Gtk.Orientation.VERTICAL, spacing = 3)
@@ -317,6 +213,65 @@ class GameInfoGui:
 
         self.mainBox.pack_start(self.gameStatsBox, True, False, 0)
         self.mainBox.pack_start(self.messageArea, True, False, 0)
+
+
+class TicTacToeInfoGui(GameInfoGui):
+
+    def __init__(self):
+        GameInfoGui.__init__(self)
+
+        self.gameInfoGrid = Gtk.Grid(orientation = Gtk.Orientation.HORIZONTAL,
+                hexpand=True)
+        self.gameInfoGrid.set_row_homogeneous(True)
+        self.gameInfoGrid.set_row_spacing(10)
+        self.gameInfoGrid.set_column_homogeneous(True)
+        self.gameInfoGrid.set_column_spacing(10)
+
+        self.XnameLabel = Gtk.Label("playerX")
+        self.XturnLabel = Gtk.Label("yes")
+        self.XwinsLabel = Gtk.Label("0")
+        self.XlossesLabel = Gtk.Label("0")
+
+        self.OnameLabel = Gtk.Label("playerO")
+        self.OturnLabel = Gtk.Label("No")
+        self.OwinsLabel = Gtk.Label("0")
+        self.OlossesLabel = Gtk.Label("0")
+
+        self.infoDic = {
+            "X" : { "name" : self.XnameLabel,
+                    "turn" : self.XturnLabel,
+                    "wins" : self.XwinsLabel,
+                    "losses" : self.XlossesLabel 
+                },
+            "O" : { "name" : self.OnameLabel,
+                    "turn" : self.OturnLabel,
+                    "wins" : self.OwinsLabel,
+                    "losses" : self.OlossesLabel
+                }
+            }
+
+        self.height = 1
+        self.width = 1
+            
+        self.gameInfoGrid.attach(self.infoDic["X"]["name"], 0, 0, self.height, self.width) 
+        self.gameInfoGrid.attach(self.infoDic["X"]["turn"], 1, 0, self.height, self.width) 
+        self.gameInfoGrid.attach(self.infoDic["X"]["wins"], 2, 0, self.height, self.width) 
+        self.gameInfoGrid.attach(self.infoDic["X"]["losses"], 4, 0, self.height, self.width) 
+
+        self.gameInfoGrid.attach(self.infoDic["O"]["name"], 0, 1, self.height, self.width) 
+        self.gameInfoGrid.attach(self.infoDic["O"]["turn"], 1, 1, self.height, self.width) 
+        self.gameInfoGrid.attach(self.infoDic["O"]["wins"], 2, 1, self.height, self.width) 
+        self.gameInfoGrid.attach(self.infoDic["O"]["losses"], 4, 1, self.height, self.width) 
+                        
+        self.gameStatsBox.pack_start(self.gameInfoGrid, True, False, 0)
+
+    def updateGameInfo(self, players):
+        for player in players:
+            self.infoDic[player.shape]["name"].set_text(player.name)
+            self.infoDic[player.shape]["turn"].set_text(str(player.turn))
+            self.infoDic[player.shape]["wins"].set_text(str(player.wins))
+            self.infoDic[player.shape]["losses"].set_text(str(player.losses))
+        self.gameInfoGrid.show_all()
 
 
 class ChatGui:
@@ -337,8 +292,6 @@ class GameGui:
         self.gameInfoGui = gameInfoGui
         self.chatGui = chatGui
         
-
-
         # Make middle game area
         hbox = Gtk.Box(orientation = Gtk.Orientation.HORIZONTAL, spacing = 0)
         hbox.set_homogeneous(False)
@@ -369,16 +322,10 @@ class ApplicationGui:
         self.notebook.append_page(Gtk.Box(), addButton)
         self.notebookLastPage = 1 
 
-
-        player1 = Player("Brandon", "X", True, "local")
-        player2 = Player("Other Brandon", "O", False, "local")
-        gameId = 1
-        self.Game1 = Game(self.builder, gameId, player1, player2)
-
     def add_tab_cb(self, widget):
         gameNum = str(self.notebookLastPage + 1)
         self.notebook.insert_page(GameGui( "game" + gameNum, TicTacToeBoard(),
-            GameInfoGui(), ChatGui()).mainBox, Gtk.Label("Game" + gameNum),
+            TicTacToeInfoGui(), ChatGui()).mainBox, Gtk.Label("Game" + gameNum),
             self.notebookLastPage)
         self.notebook.show_all()
         self.notebookLastPage += 1
