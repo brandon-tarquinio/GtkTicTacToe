@@ -159,6 +159,101 @@ tileDic = {
 }
 
 
+class TicTacToeGame:
+
+    def __init__(self, gameBoardGui, gameInfoGui, player1, player2 ):
+        self.gameBoardGui = gameBoardGui
+        self.gameInfoGui = GameInfoGui
+        self.players = [player1, player2]
+        self.curPlayerNum = 0
+
+        self.setFreshBoard()
+        self.gameBoardGui.connectButtonSignal(self.tile_clicked_cb)
+
+    def tile_clicked_cb(self, widget):
+        if (self.getCurShape(widget) == "Blank"):
+            self.setCurShape(widget)
+
+            if (self.checkForWinner()):
+                self.playerWon(widget)  
+            else: 
+                self.updatePlayer()
+#                self.updateGameInfo()
+
+    def rematchAccepted_clicked_cb(self, widget):
+        self.setFreshBoard()
+
+        #rehide the box
+        #self.builder.get_object("WinEventBox").set_opacity(0)
+
+    def rematchRejected_clicked_cb(self, widget):
+        print("blah 2")
+
+    def playerWon(self, widget):
+        winner = self.players[self.curPlayerNum]
+        winner.wins += 1
+
+        loser = self.players[(self.curPlayerNum + 1) % 2]
+        loser.losses += 1
+
+        winnerMesg = winner.name + " should be ashamed of that \n crushing defeat from "
+        winnerMesg += loser.name + ".\n Want to redeem yourself with a rematch?"
+        print(winnerMesg)
+        #self.builder.get_object("WinnerMesg").set_text
+
+        #self.updateGameInfo()
+
+        #self.builder.get_object("WinnerMesg").set_line_wrap(True)
+        #self.builder.get_object("WinnerMesg").set_justify(Gtk.Justification.FILL)
+        
+        #Unhide the box
+        #self.builder.get_object("WinEventBox").set_opacity(1.0)
+
+    # Returns true when a line contains all x or all o
+    def checkLine(self, line):
+        return (line[0] != "Blank") and (line[0] == line[1]) and (line[1] == line[2])
+
+    # Returns true if a line is all the same 
+    def checkForWinner(self):
+        #check cols 
+        for colNum in range(0,3):
+            if ( self.checkLine([row[colNum] for row in self.gameBoard]) ):
+                return True
+
+        #check rows
+        for row in self.gameBoard:
+            if ( self.checkLine(row) ):
+                return True
+
+        #check diagonals
+        return self.checkLine([self.gameBoard[i][i] for i in range(0,3)]) or self.checkLine( 
+                [ self.gameBoard[2][0], self.gameBoard[1][1], self.gameBoard[0][2] ])
+
+
+    def getCurShape(self, widget):
+        print(widget.get_name())
+        row = int(widget.get_name()[-2])
+        col = int(widget.get_name()[-1])
+        return self.gameBoard[row][col]
+
+    def setCurShape(self, widget):
+        row = int(widget.get_name()[-2])
+        col = int(widget.get_name()[-1])
+        self.gameBoard[row][col] = self.players[self.curPlayerNum].shape
+        self.gameBoardGui.setImageShape(widget, self.players[self.curPlayerNum].shape)
+
+    def updatePlayer(self):
+        self.players[self.curPlayerNum].turn = False
+        self.curPlayerNum = (self.curPlayerNum + 1) % 2
+        self.players[self.curPlayerNum].turn = True 
+        
+    def setFreshBoard(self):
+        self.gameBoard = [ ["Blank", "Blank", "Blank"], 
+                       ["Blank", "Blank", "Blank"],
+                       ["Blank", "Blank", "Blank"] ]
+
+        
+
 class GameBoardGui:
     
     def __init__( self ):
@@ -172,15 +267,36 @@ class TicTacToeBoard(GameBoardGui):
 
         self.GameBoard = Gtk.Grid(orientation = Gtk.Orientation.HORIZONTAL)
         self.mainBox.pack_start(self.GameBoard, False, False, 0)
+        self.board = [[col for col in range(0,3)] for row in range(0,3)]
+        print(self.board)
 
         for i in range(0, 3):
             for j in range(0,3):
                 button = Gtk.Button()
                 button.set_relief(Gtk.ReliefStyle.NONE)
+                button.set_name( str(j) + str(i))
+                self.board[j][i] =  button
+
                 image = Gtk.Image()
                 image.set_from_pixbuf(tileDic["Blank"])
                 button.add(image)
+
                 self.GameBoard.attach(button,i, j, 1, 1) 
+
+    def connectButtonSignal(self, callback_func):
+        for rowOfButton in self.board:
+            for button in rowOfButton:
+                button.connect("clicked", callback_func)
+
+    #def getCurImage(self, widget):
+        #print(widget.get_name())
+        #row = int(widget.get_name()[-2])
+        #col = int(widget.get_name()[-1])
+    #    return self.board[row][col]
+
+    def setImageShape(self, widget, shape):
+        widget.get_child().set_from_pixbuf(tileDic[shape])
+
 
 
 class GameInfoGui:
@@ -212,12 +328,16 @@ class ChatGui:
 
 class GameGui:
 
-    def __init__( self, gameId, gameLogic, gameGui, gameInfoGui, chatGui):
+    def __init__( self, gameId, gameGui, gameInfoGui, chatGui):
         self.gameId = gameId
-        self.gameLogic = gameLogic
+        players1 = Player("Brandon", "X", True, "local")
+        players2 = Player("Other Brandon", "O", False, "local")
+        self.gameLogic = TicTacToeGame(gameGui, gameInfoGui, players1, players2)  
         self.gameGui = gameGui
         self.gameInfoGui = gameInfoGui
         self.chatGui = chatGui
+        
+
 
         # Make middle game area
         hbox = Gtk.Box(orientation = Gtk.Orientation.HORIZONTAL, spacing = 0)
@@ -257,7 +377,7 @@ class ApplicationGui:
 
     def add_tab_cb(self, widget):
         gameNum = str(self.notebookLastPage + 1)
-        self.notebook.insert_page(GameGui( "game" + gameNum, "GameLogic", TicTacToeBoard(),
+        self.notebook.insert_page(GameGui( "game" + gameNum, TicTacToeBoard(),
             GameInfoGui(), ChatGui()).mainBox, Gtk.Label("Game" + gameNum),
             self.notebookLastPage)
         self.notebook.show_all()
