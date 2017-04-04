@@ -49,8 +49,17 @@ class TicTacToeGame(Game):
         self.gameInfoGui = TicTacToeInfoGui()
         Game.__init__(self, self.gameBoardGui, self.gameInfoGui, player1, player2)
         
+        self.gameBoard = [ ["Blank", "Blank", "Blank"], 
+                       ["Blank", "Blank", "Blank"],
+                       ["Blank", "Blank", "Blank"] ]
         self.setFreshBoard()
         self.gameBoardGui.connectButtonSignal(self.tile_clicked_cb)
+        self.gameInfoGui.connectAcceptSignal(self.rematchAccepted_clicked_cb)
+        self.gameInfoGui.connectRejectSignal(self.rematchRejected_clicked_cb)
+
+        self.mainBox.show_all()
+        self.gameInfoGui.showMessageBox(False)
+
 
     def tile_clicked_cb(self, widget):
         if (self.getCurShape(widget) == "Blank"):
@@ -62,14 +71,17 @@ class TicTacToeGame(Game):
                 self.updatePlayer()
                 self.gameInfoGui.updateGameInfo(self.players)
 
+
     def rematchAccepted_clicked_cb(self, widget):
         self.setFreshBoard()
 
-        #rehide the box
-        #self.builder.get_object("WinEventBox").set_opacity(0)
+        #rehide the message box
+        self.gameInfoGui.showMessageBox(False)
+
 
     def rematchRejected_clicked_cb(self, widget):
         print("blah 2")
+
 
     def playerWon(self, widget):
         winner = self.players[self.curPlayerNum]
@@ -80,21 +92,18 @@ class TicTacToeGame(Game):
 
         winnerMesg = winner.name + " should be ashamed of that \n crushing defeat from "
         winnerMesg += loser.name + ".\n Want to redeem yourself with a rematch?"
-        print(winnerMesg)
-        #self.builder.get_object("WinnerMesg").set_text
-
+        self.gameInfoGui.updateMessage(winnerMesg)
 
         self.gameInfoGui.updateGameInfo(self.players)
 
-        #self.builder.get_object("WinnerMesg").set_line_wrap(True)
-        #self.builder.get_object("WinnerMesg").set_justify(Gtk.Justification.FILL)
-        
-        #Unhide the box
-        #self.builder.get_object("WinEventBox").set_opacity(1.0)
+        #show the message box
+        self.gameInfoGui.showMessageBox(True)
+
 
     # Returns true when a line contains all x or all o
     def checkLine(self, line):
         return (line[0] != "Blank") and (line[0] == line[1]) and (line[1] == line[2])
+
 
     # Returns true if a line is all the same 
     def checkForWinner(self):
@@ -119,16 +128,20 @@ class TicTacToeGame(Game):
         col = int(widget.get_name()[-1])
         return self.gameBoard[row][col]
 
+
     def setCurShape(self, widget):
         row = int(widget.get_name()[-2])
         col = int(widget.get_name()[-1])
         self.gameBoard[row][col] = self.players[self.curPlayerNum].shape
         self.gameBoardGui.setImageShape(widget, self.players[self.curPlayerNum].shape)
 
+
     def setFreshBoard(self):
+        print("Making Game Board")
         self.gameBoard = [ ["Blank", "Blank", "Blank"], 
                        ["Blank", "Blank", "Blank"],
                        ["Blank", "Blank", "Blank"] ]
+
 
         
 class GameBoardGui:
@@ -137,7 +150,8 @@ class GameBoardGui:
         self.mainBox = Gtk.Box(orientation = Gtk.Orientation.HORIZONTAL, spacing = 0)
         self.mainBox.set_homogeneous(False)
 
-    
+
+
 class TicTacToeBoard(GameBoardGui):
     tileDic = {
             "X" : GdkPixbuf.Pixbuf.new_from_file_at_scale("Images/XTile.png", width=200,
@@ -148,11 +162,12 @@ class TicTacToeBoard(GameBoardGui):
                 height=200,preserve_aspect_ratio=True ),
     }
 
+
     def __init__(self):
         GameBoardGui.__init__( self )
 
-        self.GameBoard = Gtk.Grid(orientation = Gtk.Orientation.HORIZONTAL)
-        self.mainBox.pack_start(self.GameBoard, False, False, 0)
+        self.gameBoard = Gtk.Grid(orientation = Gtk.Orientation.HORIZONTAL)
+        self.mainBox.pack_start(self.gameBoard, False, False, 0)
         self.board = [[col for col in range(0,3)] for row in range(0,3)]
 
         for i in range(0, 3):
@@ -166,21 +181,25 @@ class TicTacToeBoard(GameBoardGui):
                 image.set_from_pixbuf(TicTacToeBoard.tileDic["Blank"])
                 button.add(image)
 
-                self.GameBoard.attach(button,i, j, 1, 1) 
+                self.gameBoard.attach(button,i, j, 1, 1) 
+
 
     def connectButtonSignal(self, callback_func):
         for rowOfButton in self.board:
             for button in rowOfButton:
                 button.connect("clicked", callback_func)
 
+
     def setImageShape(self, widget, shape):
         widget.get_child().set_from_pixbuf(TicTacToeBoard.tileDic[shape])
+
 
     def refreshGui():
         for i in range(0,3):
             for j in range(0, 3):
                 self.builder.get_object(self.gameStr + "Button" + str(i) + str(j) +
                         "Tile").set_from_file("Blank" + "Tile.png")
+
 
 
 class GameInfoGui:
@@ -194,14 +213,12 @@ class GameInfoGui:
         self.gameStatsBoxLabel = Gtk.Label( "Game Info" )
         self.gameStatsBox.pack_start(self.gameStatsBoxLabel, True,
                 False, 0)
-        
-        self.messageArea = Gtk.Box(orientation = Gtk.Orientation.VERTICAL, spacing = 3)
-        self.messageArea.set_homogeneous(False)
-        self.messageArea.pack_start(Gtk.Label( "This is the secret message area" ),
-                True, False, 0)
+
+        self.gameMessageBox = Gtk.Box(orientation = Gtk.Orientation.VERTICAL, spacing = 3)
+        self.gameMessageBox.set_homogeneous(False)
 
         self.mainBox.pack_start(self.gameStatsBox, True, False, 0)
-        self.mainBox.pack_start(self.messageArea, True, False, 0)
+        self.mainBox.pack_start(self.gameMessageBox, True, False, 0)
 
 
 class TicTacToeInfoGui(GameInfoGui):
@@ -241,18 +258,63 @@ class TicTacToeInfoGui(GameInfoGui):
 
         self.height = 1
         self.width = 1
-            
-        self.gameInfoGrid.attach(self.infoDic["X"]["name"], 0, 0, self.height, self.width) 
-        self.gameInfoGrid.attach(self.infoDic["X"]["turn"], 1, 0, self.height, self.width) 
-        self.gameInfoGrid.attach(self.infoDic["X"]["wins"], 2, 0, self.height, self.width) 
-        self.gameInfoGrid.attach(self.infoDic["X"]["losses"], 4, 0, self.height, self.width) 
 
-        self.gameInfoGrid.attach(self.infoDic["O"]["name"], 0, 1, self.height, self.width) 
-        self.gameInfoGrid.attach(self.infoDic["O"]["turn"], 1, 1, self.height, self.width) 
-        self.gameInfoGrid.attach(self.infoDic["O"]["wins"], 2, 1, self.height, self.width) 
-        self.gameInfoGrid.attach(self.infoDic["O"]["losses"], 4, 1, self.height, self.width) 
-                        
+        self.gameInfoGrid.attach(Gtk.Label("name"), 0, 0, self.height, self.width) 
+        self.gameInfoGrid.attach(Gtk.Label("turn"), 1, 0, self.height, self.width) 
+        self.gameInfoGrid.attach(Gtk.Label("wins"), 2, 0, self.height, self.width) 
+        self.gameInfoGrid.attach(Gtk.Label("losses"), 4, 0, self.height, self.width) 
+
+        self.gameInfoGrid.attach(self.infoDic["X"]["name"], 0, 1, self.height, self.width) 
+        self.gameInfoGrid.attach(self.infoDic["X"]["turn"], 1, 1, self.height, self.width) 
+        self.gameInfoGrid.attach(self.infoDic["X"]["wins"], 2, 1, self.height, self.width) 
+        self.gameInfoGrid.attach(self.infoDic["X"]["losses"], 4, 1, self.height, self.width) 
+
+        self.gameInfoGrid.attach(self.infoDic["O"]["name"], 0, 2, self.height, self.width) 
+        self.gameInfoGrid.attach(self.infoDic["O"]["turn"], 1, 2, self.height, self.width) 
+        self.gameInfoGrid.attach(self.infoDic["O"]["wins"], 2, 2, self.height, self.width) 
+        self.gameInfoGrid.attach(self.infoDic["O"]["losses"], 4, 2, self.height, self.width) 
+       
+        # Set up Message Area
+        self.gameMessageArea = Gtk.Box(orientation = Gtk.Orientation.VERTICAL)
+        self.gameMessageArea.set_homogeneous(False) 
+
+        self.gameMessage = Gtk.Label("Here is my message")
+        self.gameMessage.set_line_wrap(True)
+        self.gameMessage.set_justify(Gtk.Justification.FILL)
+        self.gameMessageArea.pack_start(self.gameMessage, False, False, 0)
+
+        hbox = Gtk.Box(orientation = Gtk.Orientation.HORIZONTAL)
+        hbox.set_homogeneous(True) 
+        self.gameMessageArea.pack_start(hbox, False, False, 0)
+
+        self.rejectButton = Gtk.Button( label = "Reject" )
+        hbox.pack_start(self.rejectButton, True, False, 0)
+
+        self.acceptButton = Gtk.Button( label = "Accept" ) 
+        hbox.pack_start(self.acceptButton, True, False, 0)
+
         self.gameStatsBox.pack_start(self.gameInfoGrid, True, False, 0)
+        self.gameMessageBox.pack_start(self.gameMessageArea, False, False, 0)
+
+    #TODO: Make dictionary of signals to attach in one go
+    def connectAcceptSignal(self, callback_func):
+        self.acceptButton.connect("clicked", callback_func)
+
+
+    def connectRejectSignal(self, callback_func):
+        self.rejectButton.connect("clicked", callback_func)
+
+    
+    def updateMessage(self, messageText):
+        self.gameMessage.set_text(messageText)
+
+
+    def showMessageBox(self, showBool):
+        if (showBool):
+            self.gameMessageBox.show()
+        else:
+            self.gameMessageBox.hide()
+
 
     def updateGameInfo(self, players):
         for player in players:
@@ -271,6 +333,7 @@ class ChatGui:
         self.mainBox.pack_start(Gtk.Label( "Chat box here"), True, False, 0)
 
 
+
 class GameFactory:
     games = { "TicTacToe" : TicTacToeGame }
 
@@ -280,8 +343,11 @@ class GameFactory:
         game =  GameFactory.games[gameType](player1, player2) 
         return game 
 
+
+
 class ApplicationGui:
-    
+    tabGames = []   
+
     def __init__( self ):
         self.builder = Gtk.Builder()
         self.builder.add_from_file("TicTacToeGui.glade")
@@ -297,17 +363,19 @@ class ApplicationGui:
         self.notebook.append_page(Gtk.Box(), addButton)
         self.notebookLastPage = 1 
 
+
     def add_tab_cb(self, widget):
         gameNum = str(self.notebookLastPage + 1)
 
         player1 = Player("Brandon", "X", True, "local")
         player2 = Player("Other Brandon", "O", False, "local")
         gameId = "game" + gameNum
-        self.notebook.insert_page(GameFactory.constructGame("TicTacToe", gameId, player1, player2).mainBox, 
-                Gtk.Label(gameId), self.notebookLastPage)
+        self.tabGames.append(GameFactory.constructGame("TicTacToe", gameId, player1, player2))
+        self.notebook.insert_page(self.tabGames[-1].mainBox, Gtk.Label(gameId), self.notebookLastPage)
 
-        self.notebook.show_all()
         self.notebookLastPage += 1
+
+
 
 applicationGui = ApplicationGui()
 curWindow = applicationGui.window
